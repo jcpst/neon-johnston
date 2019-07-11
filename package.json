@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "author": "Joseph Post <joe@jcpst.com>",
   "license": "MIT",
+  "repository": "jcpst/neon-johnston",
   "dependencies": {
     "neon-cli": "^0.2.0"
   },
