@@ -2,4 +2,4 @@ language: node_js
 node_js:
   - lts/*
 before_install:
-  - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain stable
+  - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
