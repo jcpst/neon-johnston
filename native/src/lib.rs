@@ -1,9 +1,14 @@
-#[macro_use]
-extern crate neon;
-extern crate johnston;
-
 use johnston::gen_lattice;
 use neon::prelude::*;
+use neon::register_module;
+
+
+// HACK: https://users.rust-lang.org/t/neon-electron-undefined-symbol-cxa-pure-virtual/21223/2
+// Also: https://github.com/neon-bindings/neon/issues/394
+#[no_mangle]
+pub extern fn __cxa_pure_virtual() {
+    loop{};
+}
 
 fn generate_lattice(mut cx: FunctionContext) -> JsResult<JsArray> {
     let js_arr_handle: Handle<JsArray> = cx.argument(0)?;

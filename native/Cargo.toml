@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Joseph Post <joe@jcpst.com>"]
 license = "MIT"
 build = "build.rs"
+edition = "2018"
 exclude = ["artifacts.json", "index.node"]
 
 [lib]
@@ -15,4 +16,4 @@ neon-build = "0.2.0"
 
 [dependencies]
 neon = "0.2.0"
-johnston = { path = "../../johnston" }
+johnston = "0.1.0"
