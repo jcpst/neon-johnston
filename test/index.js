@@ -45,13 +45,12 @@ function testFramework(tests) {
   for (let name in tests) {
     try {
       tests[name]()
-      results[name] = { worked: true }
     } catch (err) {
-      console.error('FAIL', name)
-      console.log(err.name, err.message)
-      results[name] = { worked: false }
+      console.log('FAIL', name, '\n', err.name, '\n', err.message)
       passed = false
     }
+
+    results[name] = { passed }
   }
 
   console.table(results)
