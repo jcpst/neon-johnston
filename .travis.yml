@@ -1,5 +1,5 @@
 language: node_js
 node_js:
   - lts/*
-rust:
-  - stable
+before_install:
+  - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain stable
