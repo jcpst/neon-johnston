@@ -3,23 +3,12 @@
 const assert = require('assert').strict
 const lib = require('../lib')
 
-function generate_lattice_should_return_expected_result() {
+function generateLattice_should_return_expected_result() {
   // arrange
   const p = (cents, ratio) => ({ cents, ratio })
   const dimensions = [3, 5]
   const steps = 3
-  const expectedResult = [
-    {
-      limit: dimensions[0],
-      otonal: [p(0, '1'), p(701, '3/2'), p(203, '9/8')],
-      utonal: [p(0, '1'), p(498, '4/3'), p(996, '16/9')]
-    },
-    {
-      limit: dimensions[1],
-      otonal: [p(0, '1'), p(386, '5/4'), p(772, '25/16')],
-      utonal: [p(0, '1'), p(813, '8/5'), p(427, '32/25')]
-    }
-  ]
+  const expectedResult = fixture()
 
   // act
   const result = lib.generateLattice(dimensions, steps)
@@ -35,6 +24,22 @@ function generate_lattice_should_return_expected_result() {
 
   // assert
   assert.deepEqual(resultWithTruncatedCents, expectedResult)
+}
+
+function fixture() {
+  const p = (cents, ratio) => ({ cents, ratio })
+  return [
+    {
+      limit: 3,
+      otonal: [p(0, '1'), p(701, '3/2'), p(203, '9/8')],
+      utonal: [p(0, '1'), p(498, '4/3'), p(996, '16/9')]
+    },
+    {
+      limit: 5,
+      otonal: [p(0, '1'), p(386, '5/4'), p(772, '25/16')],
+      utonal: [p(0, '1'), p(813, '8/5'), p(427, '32/25')]
+    }
+  ]
 }
 
 // Takes an object with functions as the value for properties.
@@ -59,5 +64,5 @@ function testFramework(tests) {
 }
 
 testFramework({
-  generate_lattice_should_return_expected_result
+  generateLattice_should_return_expected_result
 })

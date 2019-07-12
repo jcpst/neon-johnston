@@ -1,34 +1,22 @@
-use johnston::gen_lattice;
+use johnston::{gen_lattice, LatticeDimension};
 use neon::prelude::*;
 use neon::register_module;
-
 
 // HACK: https://users.rust-lang.org/t/neon-electron-undefined-symbol-cxa-pure-virtual/21223/2
 // Also: https://github.com/neon-bindings/neon/issues/394
 #[no_mangle]
-pub extern fn __cxa_pure_virtual() {
-    loop{};
+pub extern "C" fn __cxa_pure_virtual() {
+    loop {}
 }
 
-fn generate_lattice(mut cx: FunctionContext) -> JsResult<JsArray> {
-    let js_arr_handle: Handle<JsArray> = cx.argument(0)?;
-    let v: Vec<Handle<JsValue>> = js_arr_handle.to_vec(&mut cx)?;
-    let b = cx.argument::<JsNumber>(1)?.value() as f64;
-    let c = v
-        .iter()
-        .map(|&x| x.downcast::<JsNumber>().unwrap().value())
-        .collect::<Vec<_>>();
-    let result = gen_lattice(
-        c.iter().map(|&x| x as usize).collect::<Vec<_>>().as_slice(),
-        b as usize,
-    );
-    let js_result = JsArray::new(&mut cx, result.len() as u32);
+fn result_to_js(mut cx: FunctionContext, dimensions: Vec<LatticeDimension>) -> Handle<JsArray> {
+    let js_result = JsArray::new(&mut cx, dimensions.len() as u32);
 
-    for (i, dimension) in result.iter().enumerate() {
+    for (i, dimension) in dimensions.iter().enumerate() {
         let js_object = JsObject::new(&mut cx);
         let limit = cx.number(dimension.limit as f64);
         let otonal = JsArray::new(&mut cx, dimension.otonal.len() as u32);
-        let utonal = JsArray::new(&mut cx, dimension.otonal.len() as u32);
+        let utonal = JsArray::new(&mut cx, dimension.utonal.len() as u32);
 
         for (j, pitch) in dimension.otonal.iter().enumerate() {
             let js_pitch = JsObject::new(&mut cx);
@@ -55,6 +43,27 @@ fn generate_lattice(mut cx: FunctionContext) -> JsResult<JsArray> {
         js_object.set(&mut cx, "utonal", utonal).unwrap();
         js_result.set(&mut cx, i as u32, js_object).unwrap();
     }
+
+    js_result
+}
+
+fn generate_lattice(mut cx: FunctionContext) -> JsResult<JsArray> {
+    // Get JS values into rust.
+    let arg_1: Handle<JsArray> = cx.argument(0)?;
+    let arg_2 = cx.argument::<JsNumber>(1)?.value();
+    let vec: Vec<Handle<JsValue>> = arg_1.to_vec(&mut cx)?;
+    let vec_of_usize = vec
+        .iter()
+        .map(|&x| x.downcast::<JsNumber>().unwrap().value() as usize)
+        .collect::<Vec<_>>();
+
+    // Make the call.
+    let dimensions = vec_of_usize.as_slice();
+    let times = arg_2 as usize;
+    let result = gen_lattice(dimensions, times);
+
+    // Get rust value back out to JS
+    let js_result = result_to_js(cx, result);
 
     Ok(js_result)
 }
