@@ -3,6 +3,7 @@
 const assert = require('assert').strict
 const lib = require('../lib')
 
+// TEST
 function generateLattice_should_return_expected_result() {
   // arrange
   const p = (cents, ratio) => ({ cents, ratio })
@@ -12,10 +13,6 @@ function generateLattice_should_return_expected_result() {
 
   // act
   const result = lib.generateLattice(dimensions, steps)
-  const truncateCents = ({ cents, ratio }) => ({
-    cents: Math.trunc(cents),
-    ratio
-  })
   const resultWithTruncatedCents = result.map(({ limit, otonal, utonal }) => ({
     limit,
     otonal: otonal.map(truncateCents),
@@ -24,6 +21,13 @@ function generateLattice_should_return_expected_result() {
 
   // assert
   assert.deepEqual(resultWithTruncatedCents, expectedResult)
+}
+
+function truncateCents({ cents, ratio }) {
+  return {
+    cents: Math.trunc(cents),
+    ratio
+  }
 }
 
 function fixture() {

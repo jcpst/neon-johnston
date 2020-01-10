@@ -12,8 +12,8 @@ name = "neon_johnston"
 crate-type = ["dylib"]
 
 [build-dependencies]
-neon-build = "0.2.0"
+neon-build = "0.3.3"
 
 [dependencies]
-neon = "0.2.0"
+neon = "0.3.3"
 johnston = "0.1.0"

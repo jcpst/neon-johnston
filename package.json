@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": "jcpst/neon-johnston",
   "dependencies": {
-    "neon-cli": "^0.2.0"
+    "neon-cli": "^0.3.3"
   },
   "scripts": {
     "install": "neon build",
