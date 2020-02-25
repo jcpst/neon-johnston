@@ -16,4 +16,4 @@ neon-build = "0.3.3"
 
 [dependencies]
 neon = "0.3.3"
-johnston = "0.1.0"
+johnston = "0.2.0"

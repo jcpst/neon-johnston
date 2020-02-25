@@ -1,4 +1,4 @@
-use johnston::{gen_lattice, LatticeDimension};
+use johnston::{Lattice, LatticeDimension};
 use neon::prelude::*;
 use neon::register_module;
 
@@ -21,7 +21,7 @@ fn result_to_js(mut cx: FunctionContext, dimensions: Vec<LatticeDimension>) -> H
         for (j, pitch) in dimension.otonal.iter().enumerate() {
             let js_pitch = JsObject::new(&mut cx);
             let cents = cx.number(pitch.cents as f64);
-            let ratio = cx.string(pitch.ratio.to_string_radix(10));
+            let ratio = cx.string(pitch.ratio.to_string());
 
             js_pitch.set(&mut cx, "cents", cents).unwrap();
             js_pitch.set(&mut cx, "ratio", ratio).unwrap();
@@ -31,7 +31,7 @@ fn result_to_js(mut cx: FunctionContext, dimensions: Vec<LatticeDimension>) -> H
         for (j, pitch) in dimension.utonal.iter().enumerate() {
             let js_pitch = JsObject::new(&mut cx);
             let cents = cx.number(pitch.cents as f64);
-            let ratio = cx.string(pitch.ratio.to_string_radix(10));
+            let ratio = cx.string(pitch.ratio.to_string());
 
             js_pitch.set(&mut cx, "cents", cents).unwrap();
             js_pitch.set(&mut cx, "ratio", ratio).unwrap();
@@ -54,13 +54,13 @@ fn generate_lattice(mut cx: FunctionContext) -> JsResult<JsArray> {
     let vec: Vec<Handle<JsValue>> = arg_1.to_vec(&mut cx)?;
     let vec_of_usize = vec
         .iter()
-        .map(|&x| x.downcast::<JsNumber>().unwrap().value() as usize)
+        .map(|&x| x.downcast::<JsNumber>().unwrap().value() as i32)
         .collect::<Vec<_>>();
 
     // Make the call.
     let dimensions = vec_of_usize.as_slice();
-    let times = arg_2 as usize;
-    let result = gen_lattice(dimensions, times);
+    let times = arg_2 as i32;
+    let result = Lattice::new(dimensions, times).dimensions;
 
     // Get rust value back out to JS
     let js_result = result_to_js(cx, result);
@@ -68,7 +68,39 @@ fn generate_lattice(mut cx: FunctionContext) -> JsResult<JsArray> {
     Ok(js_result)
 }
 
+fn generate_scale(mut cx: FunctionContext) -> JsResult<JsArray> {
+    // Get JS values into rust.
+    let arg_1: Handle<JsArray> = cx.argument(0)?;
+    let arg_2 = cx.argument::<JsNumber>(1)?.value();
+    let vec: Vec<Handle<JsValue>> = arg_1.to_vec(&mut cx)?;
+    let vec_of_usize = vec
+        .iter()
+        .map(|&x| x.downcast::<JsNumber>().unwrap().value() as i32)
+        .collect::<Vec<_>>();
+
+    // Make the call.
+    let dimensions = vec_of_usize.as_slice();
+    let times = arg_2 as i32;
+    let result = Lattice::new(dimensions, times).scale();
+
+    // Get rust value back out to JS
+    let js_result = JsArray::new(&mut cx, result.len() as u32);
+
+    for (i, pitch) in result.iter().enumerate() {
+        let js_pitch = JsObject::new(&mut cx);
+        let cents = cx.number(pitch.cents as f64);
+        let ratio = cx.string(pitch.ratio.to_string());
+
+        js_pitch.set(&mut cx, "cents", cents).unwrap();
+        js_pitch.set(&mut cx, "ratio", ratio).unwrap();
+        js_result.set(&mut cx, i as u32, js_pitch).unwrap();
+    }
+
+    Ok(js_result)
+}
+
 register_module!(mut cx, {
     cx.export_function("generateLattice", generate_lattice)?;
+    cx.export_function("generateScale", generate_scale)?;
     Ok(())
 });

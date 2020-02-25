@@ -1,7 +1,8 @@
-'use strict'
+"use strict"
 
-const assert = require('assert').strict
-const lib = require('../lib')
+const assert = require("assert").strict
+const lib = require("../lib")
+const fixtures = require("./fixtures")
 
 // TEST
 function generateLattice_should_return_expected_result() {
@@ -9,7 +10,7 @@ function generateLattice_should_return_expected_result() {
   const p = (cents, ratio) => ({ cents, ratio })
   const dimensions = [3, 5]
   const steps = 3
-  const expectedResult = fixture()
+  const expectedResult = fixtures.lattice()
 
   // act
   const result = lib.generateLattice(dimensions, steps)
@@ -23,27 +24,23 @@ function generateLattice_should_return_expected_result() {
   assert.deepEqual(resultWithTruncatedCents, expectedResult)
 }
 
+// TEST
+function generateScale_should_return_expected_result() {
+  // arrange
+
+  // act
+  const result = lib.generateScale([3, 5], 3)
+  const resultWithTruncatedCents = result.map(truncateCents)
+
+  // assert
+  assert.deepEqual(resultWithTruncatedCents, fixtures.scale())
+}
+
 function truncateCents({ cents, ratio }) {
   return {
     cents: Math.trunc(cents),
     ratio
   }
-}
-
-function fixture() {
-  const p = (cents, ratio) => ({ cents, ratio })
-  return [
-    {
-      limit: 3,
-      otonal: [p(0, '1'), p(701, '3/2'), p(203, '9/8')],
-      utonal: [p(0, '1'), p(498, '4/3'), p(996, '16/9')]
-    },
-    {
-      limit: 5,
-      otonal: [p(0, '1'), p(386, '5/4'), p(772, '25/16')],
-      utonal: [p(0, '1'), p(813, '8/5'), p(427, '32/25')]
-    }
-  ]
 }
 
 // Takes an object with functions as the value for properties.
@@ -55,7 +52,7 @@ function testFramework(tests) {
     try {
       tests[name]()
     } catch (err) {
-      console.log('FAIL', name, '\n', err.name, '\n', err.message)
+      console.log("FAIL", name, "\n", err.name, "\n", err.message)
       passed = false
     }
 
@@ -68,5 +65,6 @@ function testFramework(tests) {
 }
 
 testFramework({
-  generateLattice_should_return_expected_result
+  generateLattice_should_return_expected_result,
+  generateScale_should_return_expected_result
 })
