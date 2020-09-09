@@ -1,4 +1,4 @@
-use johnston::{Lattice, LatticeDimension};
+use johnston::{Pitch, Lattice, LatticeDimension};
 use neon::prelude::*;
 use neon::register_module;
 
@@ -15,28 +15,8 @@ fn result_to_js(mut cx: FunctionContext, dimensions: Vec<LatticeDimension>) -> H
     for (i, dimension) in dimensions.iter().enumerate() {
         let js_object = JsObject::new(&mut cx);
         let limit = cx.number(dimension.limit as f64);
-        let otonal = JsArray::new(&mut cx, dimension.otonal.len() as u32);
-        let utonal = JsArray::new(&mut cx, dimension.utonal.len() as u32);
-
-        for (j, pitch) in dimension.otonal.iter().enumerate() {
-            let js_pitch = JsObject::new(&mut cx);
-            let cents = cx.number(pitch.cents as f64);
-            let ratio = cx.string(pitch.ratio.to_string());
-
-            js_pitch.set(&mut cx, "cents", cents).unwrap();
-            js_pitch.set(&mut cx, "ratio", ratio).unwrap();
-            otonal.set(&mut cx, j as u32, js_pitch).unwrap();
-        }
-
-        for (j, pitch) in dimension.utonal.iter().enumerate() {
-            let js_pitch = JsObject::new(&mut cx);
-            let cents = cx.number(pitch.cents as f64);
-            let ratio = cx.string(pitch.ratio.to_string());
-
-            js_pitch.set(&mut cx, "cents", cents).unwrap();
-            js_pitch.set(&mut cx, "ratio", ratio).unwrap();
-            utonal.set(&mut cx, j as u32, js_pitch).unwrap();
-        }
+        let otonal = to_ordinal(&mut cx, &dimension.otonal);
+        let utonal = to_ordinal(&mut cx, &dimension.utonal);
 
         js_object.set(&mut cx, "limit", limit).unwrap();
         js_object.set(&mut cx, "otonal", otonal).unwrap();
@@ -45,6 +25,23 @@ fn result_to_js(mut cx: FunctionContext, dimensions: Vec<LatticeDimension>) -> H
     }
 
     js_result
+}
+
+fn to_ordinal<'a>(cx: &mut FunctionContext<'a>, dimensions: &[Pitch]) -> Handle<'a, JsArray> {
+    let arr = JsArray::new(cx, dimensions.len() as u32);
+
+    for (idx, pitch) in dimensions.iter().enumerate() {
+        let js_pitch = JsObject::new(cx);
+        let cents = cx.number(pitch.cents as f64);
+        let ratio = cx.string(pitch.ratio.to_string());
+
+        js_pitch.set(cx, "cents", cents).unwrap();
+        js_pitch.set(cx, "ratio", ratio).unwrap();
+
+        arr.set(cx, idx as u32, js_pitch).unwrap();
+    }
+
+    arr
 }
 
 fn generate_lattice(mut cx: FunctionContext) -> JsResult<JsArray> {
